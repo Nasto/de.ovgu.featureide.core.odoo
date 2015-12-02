@@ -5,6 +5,8 @@ Bundle-SymbolicName: de.ovgu.featureide.core.odoo;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: de.ovgu.featureide.code.odoo.OdooFeatureModelBuilder
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources;bundle-version="3.9.1",
+ org.eclipse.ajdt.core;bundle-version="2.2.4"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

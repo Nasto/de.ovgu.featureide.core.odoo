@@ -1,5 +1,6 @@
 package de.ovgu.featureide.code.odoo;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -17,7 +18,7 @@ public class OdooFeatureModelBuilder extends AbstractUIPlugin {
 	/**
 	 * The constructor
 	 */
-	private OdooFeatureModelBuilder() {
+	public OdooFeatureModelBuilder() {
 	}
 
 	/*
@@ -47,4 +48,14 @@ public class OdooFeatureModelBuilder extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	/**
+	 * Returns an image descriptor for the image file at the given
+	 * plug-in relative path
+	 *
+	 * @param path the path
+	 * @return the image descriptor
+	 */
+	public static ImageDescriptor getImageDescriptor(String path) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
 }

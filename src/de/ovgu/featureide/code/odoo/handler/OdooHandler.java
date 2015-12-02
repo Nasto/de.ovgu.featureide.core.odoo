@@ -3,6 +3,11 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.handlers.HandlerUtil;
+
+import de.ovgu.featureide.code.odoo.util.FolderParsing;
 
 
 
@@ -22,20 +27,24 @@ public class OdooHandler implements IHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Auto-generated method stub
+		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+		MessageDialog.openInformation(
+				window.getShell(),
+				"Hallo",
+				FolderParsing.processContainer(FolderParsing.getCurrentProject()));
 		return null;
 	}
 
 	@Override
 	public boolean isEnabled() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isHandled() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
