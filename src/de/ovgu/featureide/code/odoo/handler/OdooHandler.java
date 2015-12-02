@@ -31,7 +31,7 @@ public class OdooHandler implements IHandler {
 		MessageDialog.openInformation(
 				window.getShell(),
 				"Hallo",
-				FolderParsing.processContainer(FolderParsing.getCurrentProject()));
+				FolderParsing.getFoldersBeneath("addons"));
 		return null;
 	}
 
