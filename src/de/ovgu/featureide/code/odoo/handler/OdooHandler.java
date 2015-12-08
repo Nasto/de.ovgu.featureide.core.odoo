@@ -7,6 +7,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import de.ovgu.featureide.code.odoo.util.FeatureModelInterpreter;
 import de.ovgu.featureide.code.odoo.util.FolderParsing;
 
 
@@ -30,8 +31,8 @@ public class OdooHandler implements IHandler {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 		MessageDialog.openInformation(
 				window.getShell(),
-				"Hallo",
-				FolderParsing.getFoldersBeneath("addons"));
+				"Odoo Feature Model Builder",
+				FeatureModelInterpreter.createFeatureModel());
 		return null;
 	}
 

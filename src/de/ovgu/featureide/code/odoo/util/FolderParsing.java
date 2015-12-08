@@ -1,14 +1,9 @@
 package de.ovgu.featureide.code.odoo.util;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -17,10 +12,9 @@ import org.eclipse.ui.PlatformUI;
 public class FolderParsing {
 
 	/**
-	 * Gets the Current Project.
-	 * 
+	 * Gets the currently selected Project.	 
 	 */
-	private static IProject getCurrentProject() {
+	public static File getCurrentProjectFolder() {
 		IProject project = null;
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 	    if (window != null)
@@ -31,171 +25,85 @@ public class FolderParsing {
 	        {
 	            project = (IProject)((IAdaptable)firstElement).getAdapter(IProject.class);
 	        }
-	    }		
-		return project;
-	}
+	    }
+	    if(project != null){
+	    	return new File(project.getLocation().toString());
+	    }else
 
-	/**
-	 * Retrieves an array of folder names of a given Folder.
-	 * 
-	 */
-	private static ArrayList<IContainer> retrieveFolder(IContainer container) {
-		IResource[] members;
-		ArrayList<IContainer> folders = new ArrayList<IContainer>();
-		if(container == null){
-			//Log Error!
-			return null;
-		}
-		try {
-			members = container.members();			
-			for (IResource member : members) {
-				if (member instanceof IContainer) {					
-					folders.add((IContainer) member);
-					folders.addAll(retrieveFolder((IContainer) member));
-				}
-			}
-			return folders;
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return folders;
+	    	System.out.println("ups");
+	    	return null;
 	}
-	
-	private static ArrayList<IContainer> retrieveDirectSubFolder(IContainer container, String FolderName) {
-		IResource[] members;
-		ArrayList<IContainer> folders = new ArrayList<IContainer>();
-		if(container == null){
-			//Log Error!
-			return null;
-		}
-		try {
-			members = container.members();
-			if(container.getName().equals(FolderName)){
-				
-				createFile(container,"hallo.xml");
-				
-				//Found it, add all of its folders to the list
-				IResource[] subMembers = ((IContainer)container).members();
-				for (IResource subMember : subMembers) {
-					if (subMember instanceof IContainer) {
-						folders.add((IContainer)subMember);
-						}
-					}
-				return folders;
-			}
-			for (IResource member : members) {
-				if (member instanceof IContainer) {				
-					if(member.getName().equals(FolderName)){
-
-						createFile((IContainer)member,"hallo.xml");
-						//Found it, add all of its folders to the list
-						IResource[] subMembers = ((IContainer)member).members();
-						for (IResource subMember : subMembers) {
-							if (subMember instanceof IContainer) {
-								folders.add((IContainer)subMember);
-								}
-							}
-						return folders;
-					}else
-					{
-						folders.addAll(retrieveDirectSubFolder((IContainer)member, FolderName));
-					}					
-				}
-			}
-			return folders;
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return folders;
-	}
-	
-	private static boolean createFile(IContainer container, String fileName){
-		boolean success = false;
-		// create File object
-		//TODO: add created File to Project
-		File stockDir = new File(container.getRawLocation().makeAbsolute()+ "/"+fileName);
-		try {
-			success = stockDir.createNewFile();
-		} catch (IOException ioe) {
-		     System.out.println("Error while Creating File in Java" + ioe);
-		}
-		return success;
-	}
-	
 	
 	/**
-	 * Retrieves an array of folder names of a given Folder.
-	 * 
+	 * Finds a Folder by its name beneath a given Folder recursively.
+	 * @param folder
+	 * @param name
+	 * @return Folder with the given name or null if it could not be found.
 	 */
-	private static ArrayList<IFile> retrieveFiles(IContainer container) {
-		IResource[] members;
-		ArrayList<IFile> files = new ArrayList<IFile>();
-		if(container == null){
-			//Log Error!
-			return null;
-		}
-		try {
-			members = container.members();
-			
-			for (IResource member : members) {
-				if (member instanceof IContainer) {		
-					files.addAll(retrieveFiles((IContainer) member));
-				} else if (member instanceof IFile) {
-					files.add((IFile)member);
+	public static File findFolderByName(File folder, String name){
+		File[] totalFiles = folder.listFiles();
+		File result = null;
+		for(File file : totalFiles){
+			if(file.isDirectory()){
+				if(file.getName().equals(name)){
+					return file;
+				}else
+				{
+					File potentialResult = findFolderByName(file,name);
+					if( potentialResult!= null){
+						result = potentialResult;
+					};
 				}
 			}
-			return files;
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return files;
-	}
-	
-	public static String getFolderNames(){
-		IProject currentProject = getCurrentProject();
-		if (currentProject == null)
-		{
-			return "Please select a Project.";
-		}
-		ArrayList<IContainer> folders = retrieveFolder(currentProject);
-		
-		String result = "";
-		for (IContainer folder : folders) {
-			result += folder.getName()+ "\r\n";
 		}
 		return result;
 	}
 	
-	public static String getFileNames(){
-		IProject currentProject = getCurrentProject();
-		if (currentProject == null)
-		{
-			return "Please select a Project.";
+	/**
+	 * Retrieves all folders contained inside the given folder
+	 * @param folder
+	 * @return An Array of Folders
+	 */
+	public static File[] retrieveSubFolders(File folder){
+		File[] totalFiles = folder.listFiles();
+		ArrayList<File> FolderList = new ArrayList<File>();
+		for(File file : totalFiles){
+			if(file.isDirectory()){
+				FolderList.add(file);
+			}
 		}
-		ArrayList<IFile> files = retrieveFiles(currentProject);
-		
-		String result = "";
-		for (IFile file : files) {
-			result += file.getName() + "\r\n";
-		}
-		return result;
+		File[] result = new File[FolderList.size()];
+		return FolderList.toArray(result);
 	}
 	
-	public static String getFoldersBeneath(String FolderName){
-		IProject currentProject = getCurrentProject();
-		if (currentProject == null)
-		{
-			return "Please select a Project.";
-		}		
-		ArrayList<IContainer> folders = retrieveDirectSubFolder(currentProject, FolderName);
-				
-		String result = "";
-		for (IContainer folder : folders) {
-			result += folder.getRawLocation().makeAbsolute()+ "\r\n";
+	/**
+	 * Retrieves a Files beneath a given Folder with a given Name.
+	 * @param folder
+	 * @param name
+	 * @return File with specific name.
+	 */
+	private static File retrieveSubFiles(File folder, String name){
+		File[] totalFiles = folder.listFiles();
+		for(File file : totalFiles){
+			if(file.isFile() && file.getName().equals(name)){
+				return file;
+			}
 		}
-		return result;
+		return null;
+	}	
+	
+	/**
+	 * Retrieves all files with a given name beneath the given folders.
+	 * @param folders
+	 * @param name
+	 * @return Array of searched Files
+	 */
+	public static File[] retrieveSubFiles(File[] folders, String name){
+		ArrayList<File> fileList = new ArrayList<File>();
+		for(File folder : folders){
+			fileList.add(retrieveSubFiles(folder, name));
+		}
+		File[] result = new File[fileList.size()];
+		return fileList.toArray(result);
 	}
 }
