@@ -7,6 +7,7 @@ Bundle-Activator: de.ovgu.featureide.code.odoo.OdooFeatureModelBuilder
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources;bundle-version="3.9.1",
- org.eclipse.ajdt.core;bundle-version="2.2.4"
+ org.eclipse.ajdt.core;bundle-version="2.2.4",
+ de.ovgu.featureide.fm.core;bundle-version="2.7.5"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
