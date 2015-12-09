@@ -1,13 +1,24 @@
 package de.ovgu.featureide.code.odoo.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.owlike.genson.Genson;
+import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.reflect.VisibilityFilter;
+
+import de.ovgu.featureide.code.odoo.Config;
 import de.ovgu.featureide.fm.core.*;
 
 public class FeatureModelInterpreter {
 	
-	private static void parseFolderStructure(File[] folders){
+	private static FeatureModel parseFolderStructure(File[] folders){
 		ArrayList<String> folderNames = new ArrayList<String>();		
 		for (File folder : folders){
 			folderNames.add(folder.getName());			
@@ -28,6 +39,8 @@ public class FeatureModelInterpreter {
 		FolderName = "nicht";
 		System.out.println("Substring: "+getSubName(FolderName));
 		System.out.println(fm.toString());	
+		
+		return fm;
 	}
 	
 	private static Feature addFolderNameToFMRec(FeatureModel fm, String FolderName){
@@ -69,14 +82,53 @@ public class FeatureModelInterpreter {
 		return Name.length() - Name.replace("_", "").length();
 	}
 	
+	
 	private static String getSubName(String name){
 		int interleavingDegree = interleavingDegree(name);
 		if(interleavingDegree == 0) return "";
 		if(interleavingDegree == 1){
 			return name.substring(0,name.lastIndexOf("_"));
 		}
-		return name.substring(name.lastIndexOf("_", name.lastIndexOf("_")-1)+1,name.lastIndexOf("_"));		
+		return name.substring(name.lastIndexOf("_", name.lastIndexOf("_")-1)+1,name.lastIndexOf("_"));
 	}
+		
+	private static void addConfigFileToFM(FeatureModel fm, File file){
+		String fileString = readFile(file);
+		String folderName = file.getParentFile().getName();
+		String featureName = folderName.substring(folderName.lastIndexOf("_")+1);
+		
+		//get rid of the possible python comments
+		String cleanString = fileString.replaceAll("(#+.*[\r\n]*)", "");
+
+		cleanString = cleanString.replaceAll(",\\s+]", "]");
+		cleanString = cleanString.replaceAll(",\\s+}", "}");
+		cleanString = cleanString.replaceAll("\"\"\"", "\"");
+		cleanString = cleanString.replaceAll("\'", "\"");
+		cleanString = cleanString.replaceAll("\'", "\"");
+		
+		
+		Config fileConfig = null;
+		try{
+			fileConfig = Json.getGenson().deserialize(cleanString, Config.class);
+		} catch(Exception e) {
+			System.out.println(featureName + " config could not be deserialized:\n" + e.getMessage());
+		}
+		
+		Feature existingFeature = fm.getFeature(featureName);
+		if(existingFeature == null){
+			throw new IllegalArgumentException(featureName + " could not be found in the given FeatureModel.");
+		}
+		System.out.println("Feature " + featureName + " found.");
+		
+		existingFeature.setDescription(fileConfig.description);
+		/*
+		List<Constraint> constraints = new ArrayList<>();
+		for(String cstr : fileConfig.depends){
+			Constraint tempCstr = new Constraint(fm, propNode)
+		}
+		*/
+	}
+	
 	
 	private static ArrayList<String> orderFolderNames(ArrayList<String> folderNames){
 		ArrayList<String> result = new ArrayList<>();
@@ -131,9 +183,40 @@ public class FeatureModelInterpreter {
 		
 		System.out.println(result);
     	
-		parseFolderStructure(addonFolders);
+		FeatureModel fm = parseFolderStructure(addonFolders);
+		
+		for(File file : configFiles){
+			addConfigFileToFM(fm, file);
+		}
 		
 		//result += "Feature Model was created successfully";
 		return result;
 	}
+	
+	
+	private static String readFile(File file) {    
+
+        char[] buffer = null;    
+
+        try {    
+                BufferedReader bufferedReader = new BufferedReader( new FileReader(file));    
+
+                buffer = new char[(int)file.length()];    
+
+                int i = 0;    
+                int c = bufferedReader.read();    
+
+                while (c >= 0) {    
+                    buffer[i++] = (char)c;    
+                    c = bufferedReader.read();    
+                }
+                
+                bufferedReader.close();
+
+        } catch (IOException e) {    
+            e.printStackTrace();    
+        }    
+
+        return new String(buffer);    
+    }
 }

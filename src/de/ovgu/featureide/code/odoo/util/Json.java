@@ -61,23 +61,23 @@ public class Json {
     /**
      * Simple wrapper to deserialize an object from a file containing its JSON representation.
      *
-     * @param file   The file. Must exists and must not be null.
-     * @param clazz The class of the object object. Must not be null.
+     * @param file   The file. Must exist and must not be null.
+     * @param toClass The class of the object object. Must not be null.
      * @throws IOException          Can't write to file. Write permission or file is open.
      * @throws JsonBindingException Something went wrong while serializing. See {@link Genson#serialize(Object, Writer)}
      * @throws JsonStreamException  Something went wrong while serializing. See {@link Genson#serialize(Object, Writer)}
      */
-    public static <T> T deserializeFromFile(File file, Class<? extends T> clazz)
+    public static <T> T deserializeFromFile(File file, Class<? extends T> toClass)
             throws IOException, JsonBindingException, JsonStreamException {
         if (file == null) {
             throw new NullPointerException("file cannot be null!");
         }
-        if (clazz == null) {
-            throw new NullPointerException("clazz cannot be null!");
+        if (toClass == null) {
+            throw new NullPointerException("targetClass cannot be null!");
         }
 
         try (Reader reader = Files.newBufferedReader(file.toPath())) {
-            return MARHSALLER.deserialize(reader, clazz);
+            return MARHSALLER.deserialize(reader, toClass);
         }
     }
 }

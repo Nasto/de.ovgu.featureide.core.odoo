@@ -77,7 +77,7 @@ public class FolderParsing {
 	}
 	
 	/**
-	 * Retrieves a Files beneath a given Folder with a given Name.
+	 * Retrieves a File beneath a given Folder with a given Name.
 	 * @param folder
 	 * @param name
 	 * @return File with specific name.

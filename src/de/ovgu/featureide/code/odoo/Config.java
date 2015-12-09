@@ -13,9 +13,12 @@ public class Config {
 	public String author;
 	public String website;
 	public String category;
-	public String depends;
 	public String description;
-	public String data;
+	public String[] depends;
+	public String[] data;
+	public String[] qweb;
+	public String[] demo;
+	public String[] test;
 	public boolean installable;
 	public boolean auto_install;
 	
