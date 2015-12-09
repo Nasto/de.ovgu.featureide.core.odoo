@@ -15,32 +15,67 @@ public class FeatureModelInterpreter {
 		
 		folderNames = orderFolderNames(folderNames);
 		
-		for (String folder : folderNames)
-			System.out.println(folder);		
-		
 		FeatureModel fm = new FeatureModel();
 		Feature f = new Feature(fm,"Odoo");
 		fm.setRoot(f);
-		Feature child = new Feature(fm,"kind");
-		fm.addFeature(child);
-		f.addChild(child);
-		System.out.println(fm.toString());
 		
+		for (String folder : folderNames)
+			addFolderNameToFMRec(fm, folder);		
+		String FolderName = "ich_auch_nicht";
+		System.out.println("Substring: "+getSubName(FolderName));
+		FolderName = "auch_nicht";
+		System.out.println("Substring: "+getSubName(FolderName));
+		FolderName = "nicht";
+		System.out.println("Substring: "+getSubName(FolderName));
+		System.out.println(fm.toString());	
 	}
 	
-	private static void addFolderNameToFM(FeatureModel fm, String FolderName){
-		int interleavingDegree = FolderName.length() - FolderName.replace("_", "").length();
+	private static Feature addFolderNameToFMRec(FeatureModel fm, String FolderName){
+		Feature existingFeature = fm.getFeature(FolderName);
+		if(existingFeature!= null){
+			//Feature already exists
+			return existingFeature;
+		}
+		Feature newFeature = null;
+		int interleavingDegree = interleavingDegree(FolderName);
 		if(interleavingDegree == 0){
 			Feature root = fm.getRoot();
-			Feature newFeature = new Feature(fm,FolderName);
+			newFeature = new Feature(fm,FolderName);
 			fm.addFeature(newFeature);
 			root.addChild(newFeature);
+		}else{
+			String fullSubName = FolderName.substring(0,FolderName.lastIndexOf("_"));
+			String subName = getSubName(FolderName);
+			String name = FolderName.substring(FolderName.lastIndexOf("_")+1);
+			
+			//existingFeature = addFolderNameToFMRec(fm,fullSubName);
+			existingFeature = fm.getFeature(subName);
+			if(existingFeature == null){
+				//The Name contains "_"
+				existingFeature = fm.getRoot();
+				newFeature = new Feature(fm,FolderName);
+			}else{
+				newFeature = new Feature(fm,name);
+			}
+					
+			
+			fm.addFeature(newFeature);
+			existingFeature.addChild(newFeature);
 		}
-		
+		return newFeature;
+	}	
+	
+	private static int interleavingDegree(String Name){
+		return Name.length() - Name.replace("_", "").length();
 	}
 	
-	private static void addFolderNameToFMRec(FeatureModel fm, String FolderName){
-		//Hier bin ich gerade..
+	private static String getSubName(String name){
+		int interleavingDegree = interleavingDegree(name);
+		if(interleavingDegree == 0) return "";
+		if(interleavingDegree == 1){
+			return name.substring(0,name.lastIndexOf("_"));
+		}
+		return name.substring(name.lastIndexOf("_", name.lastIndexOf("_")-1)+1,name.lastIndexOf("_"));		
 	}
 	
 	private static ArrayList<String> orderFolderNames(ArrayList<String> folderNames){
