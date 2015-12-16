@@ -15,6 +15,7 @@ import com.owlike.genson.reflect.VisibilityFilter;
 
 import de.ovgu.featureide.code.odoo.Config;
 import de.ovgu.featureide.fm.core.*;
+import de.ovgu.featureide.fm.core.io.xml.XmlFeatureModelWriter;
 
 public class FeatureModelInterpreter {
 	
@@ -31,13 +32,8 @@ public class FeatureModelInterpreter {
 		fm.setRoot(f);
 		
 		for (String folder : folderNames)
-			addFolderNameToFMRec(fm, folder);		
-		String FolderName = "ich_auch_nicht";
-		System.out.println("Substring: "+getSubName(FolderName));
-		FolderName = "auch_nicht";
-		System.out.println("Substring: "+getSubName(FolderName));
-		FolderName = "nicht";
-		System.out.println("Substring: "+getSubName(FolderName));
+			addFolderNameToFMRec(fm, folder);
+		
 		System.out.println(fm.toString());	
 		
 		return fm;
@@ -100,14 +96,23 @@ public class FeatureModelInterpreter {
 		String folderName = file.getParentFile().getName();
 		String featureName = folderName.substring(folderName.lastIndexOf("_")+1);
 		
-		//get rid of the possible python comments
+		//get rid of the python comments
 		String cleanString = fileString.replaceAll("(#+.*[\r\n]*)", "");
 
-		cleanString = cleanString.replaceAll(",\\s+]", "]");
-		cleanString = cleanString.replaceAll(",\\s+}", "}");
-		cleanString = cleanString.replaceAll("\"\"\"", "\"");
-		cleanString = cleanString.replaceAll("\'", "\"");
-		cleanString = cleanString.replaceAll("\'", "\"");
+		cleanString = cleanString.replaceAll(",\\s*]", "]");	// , ] --> ]
+		cleanString = cleanString.replaceAll(",\\s*}", "}");	// , } --> }
+		cleanString = cleanString.replaceAll("\"\"\"", "\"");	// """ --> "
+		cleanString = cleanString.replaceAll("\'\'\'", "\"");	// ''' --> "
+
+		cleanString = cleanString.replaceAll("\\{[\r\n\\s]*\'", "{\"");	//{ ' --> {"
+		cleanString = cleanString.replaceAll("\'[\r\n\\s]*\\}", "\"}");	//' } --> "}
+		cleanString = cleanString.replaceAll(",[\r\n]*\\s*\'", ",\n\"");	//,\n' --> ,\n"
+		cleanString = cleanString.replaceAll(":\\s*\'", ":\"");		//: ' --> :"
+		cleanString = cleanString.replaceAll("\'\\s*:", "\":");		//' : --> ":
+		cleanString = cleanString.replaceAll("\'\\s*,", "\",");			//' , --> ",
+		
+		cleanString = cleanString.replaceAll("\\[[\r\n\\s]*\'", "\\[\"");
+		cleanString = cleanString.replaceAll("\'[\r\n\\s]*\\]", "\"\\]");
 		
 		
 		Config fileConfig = null;
@@ -115,10 +120,12 @@ public class FeatureModelInterpreter {
 			fileConfig = Json.getGenson().deserialize(cleanString, Config.class);
 		} catch(Exception e) {
 			System.out.println(featureName + " config could not be deserialized:\n" + e.getMessage());
+			return;
 		}
 		
 		Feature existingFeature = fm.getFeature(featureName);
 		if(existingFeature == null){
+			
 			throw new IllegalArgumentException(featureName + " could not be found in the given FeatureModel.");
 		}
 		System.out.println("Feature " + featureName + " found.");
@@ -188,9 +195,12 @@ public class FeatureModelInterpreter {
     	
 		FeatureModel fm = parseFolderStructure(addonFolders);
 		
-		for(File file : configFiles){
-			addConfigFileToFM(fm, file);
-		}
+//		for(File file : configFiles){
+//			addConfigFileToFM(fm, file);
+//		}
+		
+		File xml = new File(ProjectFolder.getAbsolutePath() + "\\generatedModel.xml");
+		new XmlFeatureModelWriter(fm).writeToFile(xml);
 		
 		//result += "Feature Model was created successfully";
 		return result;
