@@ -61,15 +61,18 @@ public class FeatureModelInterpreter {
 			String subName = getSubName(FolderName);
 			String name = FolderName.substring(FolderName.lastIndexOf("_")+1);
 			
-			//existingFeature = addFolderNameToFMRec(fm,fullSubName);
-			existingFeature = fm.getFeature(subName);
-			if(existingFeature == null){
+			
+			existingFeature = addFolderNameToFMRec(fm,fullSubName);
+			newFeature = new Feature(fm,name);
+			
+			//existingFeature = fm.getFeature(subName);
+			//if(existingFeature == null){
 				//The Name contains "_"
-				existingFeature = fm.getRoot();
-				newFeature = new Feature(fm,FolderName);
-			}else{
-				newFeature = new Feature(fm,name);
-			}
+				//existingFeature = fm.getRoot();
+				//newFeature = new Feature(fm,FolderName);
+			//}else{
+			//	newFeature = new Feature(fm,name);
+			//}
 					
 			
 			fm.addFeature(newFeature);
