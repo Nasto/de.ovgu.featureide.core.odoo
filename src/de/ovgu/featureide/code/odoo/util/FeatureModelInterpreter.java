@@ -18,29 +18,51 @@ import de.ovgu.featureide.fm.core.*;
 
 public class FeatureModelInterpreter {
 	
-	private static FeatureModel parseFolderStructure(File[] folders){
+	private static FeatureModel parseFolderStructure(File[] folders, ArrayList<String> namingExceptions){
 		ArrayList<String> folderNames = new ArrayList<String>();		
 		for (File folder : folders){
 			folderNames.add(folder.getName());			
 		}
 		
 		folderNames = orderFolderNames(folderNames);
+		folderNames = cleanNamingExceptions(folderNames, namingExceptions);
 		
 		FeatureModel fm = new FeatureModel();
 		Feature f = new Feature(fm,"Odoo");
 		fm.setRoot(f);
 		
-		for (String folder : folderNames)
+		
+		
+		for (String folder : folderNames){
+			System.out.println(folder);	
 			addFolderNameToFMRec(fm, folder);		
-		String FolderName = "ich_auch_nicht";
-		System.out.println("Substring: "+getSubName(FolderName));
-		FolderName = "auch_nicht";
-		System.out.println("Substring: "+getSubName(FolderName));
-		FolderName = "nicht";
-		System.out.println("Substring: "+getSubName(FolderName));
+		}
+		
 		System.out.println(fm.toString());	
 		
 		return fm;
+	}
+	
+	private static ArrayList<String> cleanNamingExceptions(ArrayList<String> folderNames, ArrayList<String> namingExceptions){
+		ArrayList<String> result = new ArrayList<String>();
+		result.addAll(folderNames);
+		for (int i = 0; i<result.size(); i++){
+			if(namingExceptions.contains(result.get(i))){
+				// Foldername is one of the exceptions
+				System.out.println("Ersetzung: " + result.get(i) + " --> " + result.get(i).replace("_", "-"));
+				result.set(i, result.get(i).replace("_", "-"));
+			}else{
+				for( String namingexception : namingExceptions){
+					if(result.get(i).contains(namingexception)){
+						System.out.println("Ersetzung: " + result.get(i) + " --> " + namingexception.replace("_", "-"));
+						result.set(i, result.get(i).replace(namingexception, namingexception.replace("_", "-")));
+					}
+				}
+			}
+		}
+		
+		return result;
+		
 	}
 	
 	private static Feature addFolderNameToFMRec(FeatureModel fm, String FolderName){
@@ -50,7 +72,7 @@ public class FeatureModelInterpreter {
 			return existingFeature;
 		}
 		Feature newFeature = null;
-		int interleavingDegree = interleavingDegree(FolderName);
+		int interleavingDegree = interleavingDegree(FolderName);		
 		if(interleavingDegree == 0){
 			Feature root = fm.getRoot();
 			newFeature = new Feature(fm,FolderName);
@@ -186,7 +208,9 @@ public class FeatureModelInterpreter {
 		
 		System.out.println(result);
     	
-		FeatureModel fm = parseFolderStructure(addonFolders);
+		ArrayList<String> namingExceptions = new ArrayList<String>();
+		namingExceptions.add("point_of_sale");
+		FeatureModel fm = parseFolderStructure(addonFolders, namingExceptions);
 		
 		for(File file : configFiles){
 			addConfigFileToFM(fm, file);
