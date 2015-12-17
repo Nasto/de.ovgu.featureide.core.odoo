@@ -44,13 +44,11 @@ public class FeatureModelInterpreter {
 		for (int i = 0; i<result.size(); i++){
 			if(namingExceptions.contains(result.get(i))){
 				// Foldername is one of the exceptions
-				System.out.println("Ersetzung: " + result.get(i) + " --> " + result.get(i).replace("_", "-"));
 				result.set(i, result.get(i).replace("_", "-"));
 			}else{
 				for( String namingexception : namingExceptions){
 					if(result.get(i).contains(namingexception)){
 						// Part of the  Name is one of the exceptions
-						System.out.println("Ersetzung: " + result.get(i) + " --> " + namingexception.replace("_", "-"));
 						result.set(i, result.get(i).replace(namingexception, namingexception.replace("_", "-")));
 					}
 				}
@@ -70,7 +68,6 @@ public class FeatureModelInterpreter {
 		int interleavingDegree = interleavingDegree(FolderName);		
 		if(interleavingDegree == 0){
 			Feature root = fm.getRoot();
-			System.out.println("new1:"+ FolderName);
 			newFeature = new Feature(fm,FolderName);
 			fm.addFeature(newFeature);
 			root.addChild(newFeature);
@@ -86,7 +83,6 @@ public class FeatureModelInterpreter {
 				return fm.getFeature(name);
 			}
 			
-			System.out.println("new2:"+ name);	
 			newFeature = new Feature(fm,name);
 			
 			//existingFeature = fm.getFeature(subName);
