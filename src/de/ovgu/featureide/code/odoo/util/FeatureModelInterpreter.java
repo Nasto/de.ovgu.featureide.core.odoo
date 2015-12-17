@@ -9,12 +9,17 @@ import java.util.List;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.prop4j.Implies;
+import org.prop4j.Literal;
+
 import com.owlike.genson.Genson;
 import com.owlike.genson.GensonBuilder;
+import com.owlike.genson.JsonBindingException;
 import com.owlike.genson.reflect.VisibilityFilter;
 
 import de.ovgu.featureide.code.odoo.Config;
 import de.ovgu.featureide.fm.core.*;
+import de.ovgu.featureide.fm.core.color.FeatureColorManager;
 import de.ovgu.featureide.fm.core.io.xml.XmlFeatureModelWriter;
 
 public class FeatureModelInterpreter {
@@ -132,12 +137,12 @@ public class FeatureModelInterpreter {
 		cleanString = cleanString.replaceAll("\"\"\"", "\"");	// """ --> "
 		cleanString = cleanString.replaceAll("\'\'\'", "\"");	// ''' --> "
 
-		cleanString = cleanString.replaceAll("\\{[\r\n\\s]*\'", "{\"");	//{ ' --> {"
-		cleanString = cleanString.replaceAll("\'[\r\n\\s]*\\}", "\"}");	//' } --> "}
+		cleanString = cleanString.replaceAll("\\{[\r\n\\s]*\'", "{\"");		//{ ' --> {"
+		cleanString = cleanString.replaceAll("\'[\r\n\\s]*\\}", "\"}");		//' } --> "}
 		cleanString = cleanString.replaceAll(",[\r\n]*\\s*\'", ",\n\"");	//,\n' --> ,\n"
-		cleanString = cleanString.replaceAll(":\\s*\'", ":\"");		//: ' --> :"
-		cleanString = cleanString.replaceAll("\'\\s*:", "\":");		//' : --> ":
-		cleanString = cleanString.replaceAll("\'\\s*,", "\",");			//' , --> ",
+		cleanString = cleanString.replaceAll(":\\s*\'", ":\"");				//: ' --> :"
+		cleanString = cleanString.replaceAll("\'\\s*:", "\":");				//' : --> ":
+		cleanString = cleanString.replaceAll("\'\\s*,", "\",");				//' , --> ",
 		
 		cleanString = cleanString.replaceAll("\\[[\r\n\\s]*\'", "\\[\"");
 		cleanString = cleanString.replaceAll("\'[\r\n\\s]*\\]", "\"\\]");
@@ -146,25 +151,31 @@ public class FeatureModelInterpreter {
 		Config fileConfig = null;
 		try{
 			fileConfig = Json.getGenson().deserialize(cleanString, Config.class);
-		} catch(Exception e) {
-			System.out.println(featureName + " config could not be deserialized:\n" + e.getMessage());
+		} catch(JsonBindingException e) {
+			System.out.println(featureName + " config could not be deserialized:\n" + e.getCause().getMessage());
 			return;
 		}
 		
 		Feature existingFeature = fm.getFeature(featureName);
 		if(existingFeature == null){
-			
 			throw new IllegalArgumentException(featureName + " could not be found in the given FeatureModel.");
 		}
 		System.out.println("Feature " + featureName + " found.");
 		
-		existingFeature.setDescription(fileConfig.description);
-		/*
-		List<Constraint> constraints = new ArrayList<>();
+		//add dependencies as constraints, if it's not the parent
 		for(String cstr : fileConfig.depends){
-			Constraint tempCstr = new Constraint(fm, propNode)
+			if(!existingFeature.getParent().getName().equals(cstr))
+				fm.addConstraint(new Constraint(fm,
+						new Implies(
+						new Literal(featureName),
+						//get clean name of the concrete feature
+						new Literal(cstr.contains("_") ? cstr.substring(cstr.lastIndexOf("_")+1) : cstr)
+						)
+				));
 		}
-		*/
+		
+//		existingFeature.setDescription(fileConfig.description);
+//		existingFeature.setName(fileConfig.name.replaceAll(" ", "_"));
 	}
 	
 	
@@ -227,9 +238,9 @@ public class FeatureModelInterpreter {
 		namingExceptions.add("crm_demo");
 		FeatureModel fm = parseFolderStructure(addonFolders, namingExceptions);
 		
-//		for(File file : configFiles){
-//			addConfigFileToFM(fm, file);
-//		}
+		for(File file : configFiles){
+			addConfigFileToFM(fm, file);
+		}
 		
 		File xml = new File(ProjectFolder.getAbsolutePath() + "\\generatedModel.xml");
 		new XmlFeatureModelWriter(fm).writeToFile(xml);
