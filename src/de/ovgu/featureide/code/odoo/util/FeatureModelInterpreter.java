@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -123,7 +124,16 @@ public class FeatureModelInterpreter {
 	private static void addConfigFileToFM(FeatureModel fm, File file){
 		String fileString = readFile(file);
 		String folderName = file.getParentFile().getName();
+		
+		//TODO: uncomment next line and delete the line after that to use the Map<FolderName, FeatureName>
+		//String featureName = featureMap.get(folderName); 
 		String featureName = folderName.substring(folderName.lastIndexOf("_")+1);
+		
+		Feature existingFeature = fm.getFeature(featureName);
+		if(existingFeature == null){
+			throw new IllegalArgumentException(featureName + " could not be found in the given FeatureModel.");
+		}
+		System.out.println("Feature " + featureName + " found.");
 		
 		//get rid of the python comments
 		String cleanString = fileString.replaceAll("(#+.*[\r\n]*)", "");
@@ -152,12 +162,6 @@ public class FeatureModelInterpreter {
 			return;
 		}
 		
-		Feature existingFeature = fm.getFeature(featureName);
-		if(existingFeature == null){
-			throw new IllegalArgumentException(featureName + " could not be found in the given FeatureModel.");
-		}
-		System.out.println("Feature " + featureName + " found.");
-		
 		//add dependencies as constraints, if it's not the parent
 		for(String cstr : fileConfig.depends){
 			if(!existingFeature.getParent().getName().equals(cstr))
@@ -170,8 +174,90 @@ public class FeatureModelInterpreter {
 				));
 		}
 		
-//		existingFeature.setDescription(fileConfig.description);
-//		existingFeature.setName(fileConfig.name.replaceAll(" ", "_"));
+		String descText = "";
+		
+		if(fileConfig.name != null){
+			descText += "Name:\n\t";
+			descText += fileConfig.name;
+		}
+		
+		if (fileConfig.version != null) {
+			descText += "\nVersion:\n\t";
+			descText += fileConfig.version;
+		}
+		
+		if (fileConfig.website != null) {
+			descText += "\nWebsite:\n\t";
+			descText += fileConfig.website;
+		}
+		
+		if (fileConfig.category != null) {
+			descText += "\nCategory:\n\t";
+			descText += fileConfig.category;
+		}
+		
+		if (fileConfig.description != null) {
+			descText += "\nDescription:\n\t";
+			descText += fileConfig.description;
+		}
+		
+		if (fileConfig.author != null) {
+			descText += "\nAuthor:";
+			if (fileConfig.author.getClass().equals(String.class)) {
+				descText += fileConfig.author;
+			} else {
+				Collection<String> authors = (Collection<String>) fileConfig.author;
+				for(String auth : authors){
+					descText += "\n\t" + auth;
+				}
+			}
+		}
+		
+		if(fileConfig.depends != null){
+			descText += "\nDepends:";
+			for(String dep : fileConfig.depends){
+				descText += "\n\t"+dep;
+			}
+		}
+		
+		if(fileConfig.data != null){
+			descText += "\nData:";
+			for(String data : fileConfig.data){
+				descText += "\n\t"+data;
+			}
+		}
+		
+		if(fileConfig.qweb != null){
+			descText += "\nQweb:";
+			for(String qweb : fileConfig.qweb){
+				descText += "\n\t"+qweb;
+			}
+		}
+		
+		if(fileConfig.demo != null){
+			descText += "\nDemo:";
+			for(String demo : fileConfig.demo){
+				descText += "\n\t"+demo;
+			}
+		}
+		
+		if(fileConfig.test != null){
+			descText += "\nTest:";
+			for(String test : fileConfig.test){
+				descText += "\n\t"+test;
+			}
+		}
+		
+		descText += "\nSequence:\n\t";
+		descText += fileConfig.sequence;
+		
+		descText += "\nInstallable:\n\t";
+		descText += fileConfig.installable;
+		
+		descText += "\nAuto_Install:\n\t";
+		descText += fileConfig.auto_install;
+		
+		existingFeature.setDescription(descText);
 	}
 	
 	

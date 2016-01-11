@@ -13,7 +13,7 @@ public class Config {
 	public String website;
 	public String category;
 	public String description;
-	public String author;
+	public Object author;
 	public String[] depends;
 	public String[] data;
 	public String[] qweb;
