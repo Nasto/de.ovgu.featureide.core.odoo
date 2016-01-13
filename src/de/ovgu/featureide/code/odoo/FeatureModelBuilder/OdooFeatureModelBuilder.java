@@ -1,4 +1,4 @@
-package de.ovgu.featureide.code.odoo;
+package de.ovgu.featureide.code.odoo.FeatureModelBuilder;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;

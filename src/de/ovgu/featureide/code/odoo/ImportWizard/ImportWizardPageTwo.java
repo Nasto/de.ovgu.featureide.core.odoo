@@ -1,5 +1,8 @@
 package de.ovgu.featureide.code.odoo.ImportWizard;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -11,15 +14,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public class MyPageTwo extends WizardPage {
-  private Text text1;
+public class ImportWizardPageTwo extends WizardPage {
+  private Text namingExceptions;
   private Composite container;
 
-  public MyPageTwo() {
+  public ImportWizardPageTwo() {
     super("Naming Exceptions");
     setTitle("Naming Exceptions");
-    setDescription("Add feature names, that have an underline '_' in it.");
-    setControl(text1);
+    setDescription("Add feature names, that have an underline '_' in it. Seperate names by comma.");
+    setControl(namingExceptions);
   }
 
   @Override
@@ -31,9 +34,9 @@ public class MyPageTwo extends WizardPage {
     Label label1 = new Label(container, SWT.NONE);
     label1.setText("Features:");
 
-    text1 = new Text(container, SWT.BORDER | SWT.SINGLE);
-    text1.setText("point_of_sale; claim_from_delivery; crm_demo");
-    text1.addKeyListener(new KeyListener() {
+    namingExceptions = new Text(container, SWT.BORDER | SWT.SINGLE);
+    namingExceptions.setText("point_of_sale, claim_from_delivery, crm_demo");
+    namingExceptions.addKeyListener(new KeyListener() {
 
       @Override
       public void keyPressed(KeyEvent e) {
@@ -42,14 +45,14 @@ public class MyPageTwo extends WizardPage {
 
       @Override
       public void keyReleased(KeyEvent e) {
-        if (!text1.getText().isEmpty()) {
+        if (!namingExceptions.getText().isEmpty()) {
           setPageComplete(true);
         }
       }
 
     });
     GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-    text1.setLayoutData(gd);
+    namingExceptions.setLayoutData(gd);
     Label labelCheck = new Label(container, SWT.NONE);
     labelCheck.setText("Merge with existing Feature model");
     Button check = new Button(container, SWT.CHECK);
@@ -59,8 +62,8 @@ public class MyPageTwo extends WizardPage {
     setPageComplete(true);
   }
 
-  public String getText1() {
-    return text1.getText();
+  public ArrayList<String> getNamingExceptions() {
+    return new ArrayList<String>(Arrays.asList(namingExceptions.getText().split("\\s*,\\s*")));
   }
 }
  

@@ -1,12 +1,6 @@
-package de.ovgu.featureide.code.odoo;
+package de.ovgu.featureide.code.odoo.Models;
 
-/**
- * A class to hold the values which parsed from JSON configs.
- * 
- * @author Stephan Dörfler
- *
- */
-public class Config {
+public class FeatureDataModell {
 
 	public String name;
 	public String version;
@@ -22,6 +16,4 @@ public class Config {
 	public int sequence;
 	public boolean installable;
 	public boolean auto_install;
-	
-	
 }

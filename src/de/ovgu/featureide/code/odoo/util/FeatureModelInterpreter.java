@@ -6,10 +6,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.prop4j.Implies;
 import org.prop4j.Literal;
+
 import com.owlike.genson.JsonBindingException;
-import de.ovgu.featureide.code.odoo.Config;
+
+import de.ovgu.featureide.code.odoo.Models.FeatureDataModell;
 import de.ovgu.featureide.fm.core.*;
 import de.ovgu.featureide.fm.core.io.xml.XmlFeatureModelWriter;
 
@@ -146,9 +149,9 @@ public class FeatureModelInterpreter {
 		cleanString = cleanString.replaceAll("\'[\r\n\\s]*\\]", "\"\\]");
 		
 		
-		Config fileConfig = null;
+		FeatureDataModell fileConfig = null;
 		try{
-			fileConfig = Json.getGenson().deserialize(cleanString, Config.class);
+			fileConfig = Json.getGenson().deserialize(cleanString, FeatureDataModell.class);
 		} catch(JsonBindingException e) {
 			System.out.println(featureName + " config could not be deserialized:\n" + e.getCause().getMessage());
 			return;
@@ -283,10 +286,10 @@ public class FeatureModelInterpreter {
 	 * Default constructor for no known feature Path, assuming the features are below the current project.
 	 */
 	public static String createFeatureModel(){
-		return createFeatureModel("");
+		return createFeatureModel("", new ArrayList<String>());
 	}
 	
-	public static String createFeatureModel(String path){
+	public static String createFeatureModel(String path, ArrayList<String> namingExceptions){
 		String result = "";
 		try{
 			result = "Project Path:\r\n ";
@@ -314,10 +317,6 @@ public class FeatureModelInterpreter {
 			File[] configFiles = FolderParsing.retrieveSubFiles(addonFolders,configFileName);
 			result += "Files inside those Folders named '__openerp__.py': \t" + configFiles.length;				
 				    	
-			ArrayList<String> namingExceptions = new ArrayList<String>();
-			namingExceptions.add("point_of_sale");
-			namingExceptions.add("claim_from_delivery");
-			namingExceptions.add("crm_demo");
 			FeatureModel fm = parseFolderStructure(addonFolders, namingExceptions);
 			result += "\r\nFeatures Added: \t"+ featuresAdded + "\r\n ";
 			
