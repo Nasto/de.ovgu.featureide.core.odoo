@@ -6,25 +6,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.prop4j.Implies;
 import org.prop4j.Literal;
-
-import com.owlike.genson.Genson;
-import com.owlike.genson.GensonBuilder;
 import com.owlike.genson.JsonBindingException;
-import com.owlike.genson.reflect.VisibilityFilter;
-
 import de.ovgu.featureide.code.odoo.Config;
 import de.ovgu.featureide.fm.core.*;
-import de.ovgu.featureide.fm.core.color.FeatureColorManager;
 import de.ovgu.featureide.fm.core.io.xml.XmlFeatureModelWriter;
 
 public class FeatureModelInterpreter {
 	
+	private static int featuresAdded = 0;
+	
+	
+	/*
+	 * Creates a FeatureModel out of the naming of the input folder names.
+	 */
 	private static FeatureModel parseFolderStructure(File[] folders, ArrayList<String> namingExceptions){
 		ArrayList<String> folderNames = new ArrayList<String>();		
 		for (File folder : folders){
@@ -39,11 +35,16 @@ public class FeatureModelInterpreter {
 		fm.setRoot(f);
 		
 		for (String folder : folderNames){
-			addFolderNameToFMRec(fm, folder);		
+			
+			String featureName = addFolderNameToFMRec(fm, folder, false).getName();		
+			System.out.println(folder + " --> "+ featureName);
 		}
 		return fm;
 	}
 	
+	/*
+	 * Some names contain an underline '_' witch would be interpreted as a seperator between two features. These are exchanged by a minus '-'.
+	 */
 	private static ArrayList<String> cleanNamingExceptions(ArrayList<String> folderNames, ArrayList<String> namingExceptions){
 		ArrayList<String> result = new ArrayList<String>();
 		result.addAll(folderNames);
@@ -61,10 +62,23 @@ public class FeatureModelInterpreter {
 			}
 		}		
 		return result;
-		
 	}
 	
-	private static Feature addFolderNameToFMRec(FeatureModel fm, String FolderName){
+	/*
+	 * Some names contain an underline '_' witch would be interpreted as a seperator between two features. These are exchanged by a minus '-'.
+	 */
+	private static String cleanNamingExceptions(String folderName, ArrayList<String> namingExceptions){
+		ArrayList<String> result = new ArrayList<String>();
+		result.add(folderName);
+		
+		return cleanNamingExceptions(result, namingExceptions).get(0);
+	}
+	
+	/*
+	 * Adds a foldername(feature) to a FeatureModel and returns the newly added Feature. This function is recursive to add dependencies if
+	 * the name is i.e. "root_parent_feature" --> "root_parent" + "feature" --> "root" + "parent" + "feature".
+	 */
+	private static Feature addFolderNameToFMRec(FeatureModel fm, String FolderName, boolean isRecursive){
 		Feature existingFeature = fm.getFeature(FolderName);
 		if(existingFeature!= null){
 			//Feature already exists
@@ -73,61 +87,42 @@ public class FeatureModelInterpreter {
 		Feature newFeature = null;
 		int interleavingDegree = interleavingDegree(FolderName);		
 		if(interleavingDegree == 0){
+			if(isRecursive)
+				System.out.println("This feature had to be added: " + FolderName);
 			Feature root = fm.getRoot();
+			featuresAdded++;
 			newFeature = new Feature(fm,FolderName);
 			fm.addFeature(newFeature);
 			root.addChild(newFeature);
 		}else{
 			String fullSubName = FolderName.substring(0,FolderName.lastIndexOf("_"));
-			String subName = getSubName(FolderName);
-			String name = FolderName.substring(FolderName.lastIndexOf("_")+1);
 			
+			existingFeature = addFolderNameToFMRec(fm,fullSubName, true);
 			
-			existingFeature = addFolderNameToFMRec(fm,fullSubName);
-			if(fm.getFeature(name)!= null){
-				//Feature already exists
-				return fm.getFeature(name);
-			}
-			
-			newFeature = new Feature(fm,name);
-			
-			//existingFeature = fm.getFeature(subName);
-			//if(existingFeature == null){
-				//The Name contains "_"
-				//existingFeature = fm.getRoot();
-				//newFeature = new Feature(fm,FolderName);
-			//}else{
-			//	newFeature = new Feature(fm,name);
-			//}
-					
-			
+			featuresAdded++;
+			newFeature = new Feature(fm,FolderName);
+			if(isRecursive)
+				System.out.println("This feature had to be added: " + FolderName);
 			fm.addFeature(newFeature);
 			existingFeature.addChild(newFeature);
 		}
 		return newFeature;
 	}	
 	
+	/*
+	 * Returns the number of strings separated by an underline.
+	 */
 	private static int interleavingDegree(String Name){
 		return Name.length() - Name.replace("_", "").length();
 	}
 	
 	
-	private static String getSubName(String name){
-		int interleavingDegree = interleavingDegree(name);
-		if(interleavingDegree == 0) return "";
-		if(interleavingDegree == 1){
-			return name.substring(0,name.lastIndexOf("_"));
-		}
-		return name.substring(name.lastIndexOf("_", name.lastIndexOf("_")-1)+1,name.lastIndexOf("_"));
-	}
-		
-	private static void addConfigFileToFM(FeatureModel fm, File file){
+	private static void addConfigFileToFM(FeatureModel fm, File file, ArrayList<String> namingExceptions){
 		String fileString = readFile(file);
 		String folderName = file.getParentFile().getName();
 		
-		//TODO: uncomment next line and delete the line after that to use the Map<FolderName, FeatureName>
-		//String featureName = featureMap.get(folderName); 
-		String featureName = folderName.substring(folderName.lastIndexOf("_")+1);
+		String featureName = cleanNamingExceptions(folderName,namingExceptions);
+		
 		
 		Feature existingFeature = fm.getFeature(featureName);
 		if(existingFeature == null){
@@ -135,6 +130,7 @@ public class FeatureModelInterpreter {
 		}
 		System.out.println("Feature " + featureName + " found.");
 		
+		//TODO: some errors left.
 		//get rid of the python comments
 		String cleanString = fileString.replaceAll("(#+.*[\r\n]*)", "");
 
@@ -161,7 +157,7 @@ public class FeatureModelInterpreter {
 			System.out.println(featureName + " config could not be deserialized:\n" + e.getCause().getMessage());
 			return;
 		}
-		
+		//TODO: adds constraint that doesn't exist i.e. "setup".
 		//add dependencies as constraints, if it's not the parent
 		for(String cstr : fileConfig.depends){
 			if(!existingFeature.getParent().getName().equals(cstr))
@@ -260,7 +256,9 @@ public class FeatureModelInterpreter {
 		existingFeature.setDescription(descText);
 	}
 	
-	
+	/*
+	 * Orders an array of Strings by the amount of underlines they contain.
+	 */
 	private static ArrayList<String> orderFolderNames(ArrayList<String> folderNames){
 		ArrayList<String> result = new ArrayList<>();
 		if(folderNames.size()==0) return result;
@@ -271,6 +269,9 @@ public class FeatureModelInterpreter {
 		return result;
 	}
 	
+	/*
+	 * Returns a List of all Strings in the input Array containing exactly <amount> of <substring>.
+	 */
 	private static ArrayList<String> getStringsContaining(ArrayList<String> totalStrings, String substring, int amount){
 		ArrayList<String> result = new ArrayList<>();
 		for (String string : totalStrings){
@@ -282,53 +283,64 @@ public class FeatureModelInterpreter {
 		return result;
 	}
 	
+	/*
+	 * Default constructor for no known feature Path, assuming the features are below the current project.
+	 */
 	public static String createFeatureModel(){
 		return createFeatureModel("");
 	}
 	
 	public static String createFeatureModel(String path){
-		String result = "Project Path:\r\n ";
-		File ProjectFolder;
-		if(path == ""){
-			ProjectFolder = FolderParsing.getCurrentProjectFolder();
-			if(ProjectFolder == null) return "Please select a Project.";			
-		}else
-		{
-			ProjectFolder = new File(path);
-		}			
-		result += ProjectFolder.toString();
-		result += "\r\n\r\nAddons Folder:\r\n ";
-		
-		String folderName = "addons";
-		File addonFolder = FolderParsing.findFolderByName(ProjectFolder,folderName);
-		if(addonFolder == null) return "There is no folder named '"+folderName+"' beneath this Path.";		
-		result += addonFolder.toString();
-		
-		File[] addonFolders = FolderParsing.retrieveSubFolders(addonFolder);
-		if(addonFolders == null) return "There are no folders beneath '"+folderName+"'.";		
-		result += "\r\n\r\nFolders beneath '"+folderName+"':\r\n "+addonFolders.length+"\r\n";		
-		
-		String configFileName = "__openerp__.py";
-		File[] configFiles = FolderParsing.retrieveSubFiles(addonFolders,configFileName);
-		result += "Files inside those Folders named '__openerp__.py':\r\n " + configFiles.length+"\r\n";				
-		
-		System.out.println(result);
-    	
-		ArrayList<String> namingExceptions = new ArrayList<String>();
-		namingExceptions.add("point_of_sale");
-		namingExceptions.add("claim_from_delivery");
-		namingExceptions.add("crm_demo");
-		FeatureModel fm = parseFolderStructure(addonFolders, namingExceptions);
-		
-		for(File file : configFiles){
-			addConfigFileToFM(fm, file);
+		String result = "";
+		try{
+			result = "Project Path:\r\n ";
+			File ProjectFolder;
+			if(path == ""){
+				ProjectFolder = FolderParsing.getCurrentProjectFolder();
+				if(ProjectFolder == null) return "Please select a Project.";			
+			}else
+			{
+				ProjectFolder = new File(path);
+			}			
+			result += ProjectFolder.toString();
+			result += "\r\n\r\nAddons Folder:\r\n ";
+			
+			String folderName = "addons";
+			File addonFolder = FolderParsing.findFolderByName(ProjectFolder,folderName);
+			if(addonFolder == null) return "There is no folder named '"+folderName+"' beneath this Path.";		
+			result += addonFolder.toString();
+			
+			File[] addonFolders = FolderParsing.retrieveSubFolders(addonFolder);
+			if(addonFolders == null) return "There are no folders beneath '"+folderName+"'.";		
+			result += "\r\n\r\nFolders beneath '"+folderName+"': \t"+addonFolders.length+"\r\n";		
+			
+			String configFileName = "__openerp__.py";
+			File[] configFiles = FolderParsing.retrieveSubFiles(addonFolders,configFileName);
+			result += "Files inside those Folders named '__openerp__.py': \t" + configFiles.length;				
+			
+			
+	    	
+			ArrayList<String> namingExceptions = new ArrayList<String>();
+			namingExceptions.add("point_of_sale");
+			namingExceptions.add("claim_from_delivery");
+			namingExceptions.add("crm_demo");
+			FeatureModel fm = parseFolderStructure(addonFolders, namingExceptions);
+			result += "\r\nFeatures Added: \t"+ featuresAdded + "\r\n ";
+			System.out.println(result);
+			for(File file : configFiles){
+				addConfigFileToFM(fm, file,namingExceptions );
+			}
+			
+			File xml = new File(ProjectFolder.getAbsolutePath() + "\\generatedModel.xml");
+			new XmlFeatureModelWriter(fm).writeToFile(xml);
+			
+			result += "\r\nFeature Model was created successfully";
+			
+			return result;
 		}
-		
-		File xml = new File(ProjectFolder.getAbsolutePath() + "\\generatedModel.xml");
-		new XmlFeatureModelWriter(fm).writeToFile(xml);
-		
-		result += "\r\nFeature Model was created successfully";
-		return result;
+		catch(Exception e){
+			return "Error:  "+e.getLocalizedMessage() + "\r\n\r\nOutput so far: \r\n"+result;
+		}
 	}
 	
 	

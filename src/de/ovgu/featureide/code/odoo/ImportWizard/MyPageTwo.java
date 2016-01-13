@@ -1,4 +1,4 @@
-package de.ovgu.featureide.code.odoo.util;
+package de.ovgu.featureide.code.odoo.ImportWizard;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;

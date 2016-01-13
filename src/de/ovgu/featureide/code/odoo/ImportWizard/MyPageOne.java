@@ -1,4 +1,4 @@
-package de.ovgu.featureide.code.odoo.util;
+package de.ovgu.featureide.code.odoo.ImportWizard;
 
 
 import java.io.File;
@@ -12,6 +12,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+import de.ovgu.featureide.code.odoo.util.FolderParsing;
 
 
 public class MyPageOne extends WizardPage {
