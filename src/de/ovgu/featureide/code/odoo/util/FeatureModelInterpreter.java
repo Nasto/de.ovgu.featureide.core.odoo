@@ -35,9 +35,7 @@ public class FeatureModelInterpreter {
 		fm.setRoot(f);
 		
 		for (String folder : folderNames){
-			
-			String featureName = addFolderNameToFMRec(fm, folder, false).getName();		
-			System.out.println(folder + " --> "+ featureName);
+			addFolderNameToFMRec(fm, folder, false);
 		}
 		return fm;
 	}
@@ -122,13 +120,11 @@ public class FeatureModelInterpreter {
 		String folderName = file.getParentFile().getName();
 		
 		String featureName = cleanNamingExceptions(folderName,namingExceptions);
-		
-		
+				
 		Feature existingFeature = fm.getFeature(featureName);
 		if(existingFeature == null){
 			throw new IllegalArgumentException(featureName + " could not be found in the given FeatureModel.");
 		}
-		System.out.println("Feature " + featureName + " found.");
 		
 		//TODO: some errors left.
 		//get rid of the python comments
@@ -317,16 +313,14 @@ public class FeatureModelInterpreter {
 			String configFileName = "__openerp__.py";
 			File[] configFiles = FolderParsing.retrieveSubFiles(addonFolders,configFileName);
 			result += "Files inside those Folders named '__openerp__.py': \t" + configFiles.length;				
-			
-			
-	    	
+				    	
 			ArrayList<String> namingExceptions = new ArrayList<String>();
 			namingExceptions.add("point_of_sale");
 			namingExceptions.add("claim_from_delivery");
 			namingExceptions.add("crm_demo");
 			FeatureModel fm = parseFolderStructure(addonFolders, namingExceptions);
 			result += "\r\nFeatures Added: \t"+ featuresAdded + "\r\n ";
-			System.out.println(result);
+			
 			for(File file : configFiles){
 				addConfigFileToFM(fm, file,namingExceptions );
 			}
@@ -335,10 +329,11 @@ public class FeatureModelInterpreter {
 			new XmlFeatureModelWriter(fm).writeToFile(xml);
 			
 			result += "\r\nFeature Model was created successfully";
-			
+			System.out.println(result);
 			return result;
 		}
 		catch(Exception e){
+			System.out.println(result);
 			return "Error:  "+e.getLocalizedMessage() + "\r\n\r\nOutput so far: \r\n"+result;
 		}
 	}
