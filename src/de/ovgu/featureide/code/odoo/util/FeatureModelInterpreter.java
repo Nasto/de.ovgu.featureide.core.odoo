@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 import org.prop4j.Implies;
 import org.prop4j.Literal;
@@ -88,11 +90,13 @@ public class FeatureModelInterpreter {
 		Feature newFeature = null;
 		int interleavingDegree = interleavingDegree(FolderName);		
 		if(interleavingDegree == 0){
-			if(isRecursive)
+			newFeature = new Feature(fm,FolderName);
+			if(isRecursive){
 				System.out.println("This feature had to be added: " + FolderName);
+				newFeature.setAbstract(true);
+			}
 			Feature root = fm.getRoot();
 			featuresAdded++;
-			newFeature = new Feature(fm,FolderName);
 			fm.addFeature(newFeature);
 			root.addChild(newFeature);
 		}else{
@@ -102,8 +106,10 @@ public class FeatureModelInterpreter {
 			
 			featuresAdded++;
 			newFeature = new Feature(fm,FolderName);
-			if(isRecursive)
+			if(isRecursive){
 				System.out.println("This feature had to be added: " + FolderName);
+				newFeature.setAbstract(true);
+			}				
 			fm.addFeature(newFeature);
 			existingFeature.addChild(newFeature);
 		}
@@ -159,14 +165,21 @@ public class FeatureModelInterpreter {
 		//TODO: adds constraint that doesn't exist i.e. "setup".
 		//add dependencies as constraints, if it's not the parent
 		for(String cstr : fileConfig.depends){
-			if(!existingFeature.getParent().getName().equals(cstr))
+			if(!existingFeature.getParent().getName().equals(cstr)) {
+				
+				String impliedFeatureName = cleanNamingExceptions(cstr,namingExceptions);
+				if (fm.getFeature(impliedFeatureName) == null) {
+					System.err.println("feature " + impliedFeatureName + " not found");
+					continue;
+				}
 				fm.addConstraint(new Constraint(fm,
 						new Implies(
 						new Literal(featureName),
 						//get clean name of the concrete feature
-						new Literal(cstr.contains("_") ? cstr.substring(cstr.lastIndexOf("_")+1) : cstr)
+						new Literal(impliedFeatureName)
 						)
 				));
+			}
 		}
 		
 		String descText = "";
@@ -323,8 +336,9 @@ public class FeatureModelInterpreter {
 			for(File file : configFiles){
 				addConfigFileToFM(fm, file,namingExceptions );
 			}
-			
-			File xml = new File(ProjectFolder.getAbsolutePath() + "\\generatedModel.xml");
+			Date date = new Date() ;
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
+			File xml = new File(ProjectFolder.getAbsolutePath() + "\\generatedModel_"+ dateFormat.format(date)+".xml");
 			new XmlFeatureModelWriter(fm).writeToFile(xml);
 			
 			result += "\r\nFeature Model was created successfully";
