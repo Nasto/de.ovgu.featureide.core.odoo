@@ -36,26 +36,13 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
-         <menu
-               label="Sample Menu"
-               mnemonic="M"
-               id="de.ovgu.featureide.code.odoo.menus.sampleMenu">
-            <command
-                  commandId="de.ovgu.featureide.code.odoo.commands.OdooCommand"
-                  mnemonic="S"
-                  id="de.ovgu.featureide.code.odoo.menus.sampleCommand">
-            </command>
-         </menu>
-      </menuContribution>
-      <menuContribution
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
                id="de.ovgu.featureide.code.odoo.toolbars.sampleToolbar">
             <command
                   commandId="de.ovgu.featureide.code.odoo.commands.OdooCommand"
                   icon="icons/odooIcon.gif"
-                  tooltip="Say hello world"
+                  tooltip="Generate FeatureModel for Odoo"
                   id="de.ovgu.featureide.code.odoo.toolbars.sampleCommand">
             </command>
          </toolbar>
