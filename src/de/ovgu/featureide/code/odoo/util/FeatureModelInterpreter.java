@@ -377,6 +377,7 @@ public class FeatureModelInterpreter {
 		}
 		catch(Exception e){
 			System.out.println(result);
+			
 			return "Error:  "+e.getLocalizedMessage() + "\r\n\r\nOutput so far: \r\n"+result;
 		}
 	}
