@@ -8,7 +8,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+import org.prop4j.And;
 import org.prop4j.Implies;
 import org.prop4j.Literal;
 
@@ -20,6 +25,7 @@ import de.ovgu.featureide.fm.core.io.xml.XmlFeatureModelWriter;
 
 public class FeatureModelInterpreter {
 	
+	private static Map<Feature,Set<Feature>> uniqueConstraints;
 	private static int featuresAdded = 0;
 	
 	
@@ -123,6 +129,23 @@ public class FeatureModelInterpreter {
 		return Name.length() - Name.replace("_", "").length();
 	}
 	
+	/*
+	 * Adds the collected constraints.
+	 */
+	private static void addConstraints(FeatureModel fm){
+		for(Map.Entry<Feature, Set<Feature>> entry : uniqueConstraints.entrySet()){
+			ArrayList<Literal> literalList = new ArrayList<Literal>();
+			for(Feature featureEntry : entry.getValue()){
+				literalList.add(new Literal(featureEntry.getName()));
+			}
+			fm.addConstraint(new Constraint(fm,
+							new Implies(
+							new Literal(entry.getKey().getName()),
+							new And(literalList)
+							)
+					));			
+		}				
+	}
 	
 	private static void addConfigFileToFM(FeatureModel fm, File file, ArrayList<String> namingExceptions){
 		String fileString = readFile(file);
@@ -159,28 +182,31 @@ public class FeatureModelInterpreter {
 		try{
 			fileConfig = Json.getGenson().deserialize(cleanString, FeatureDataModell.class);
 		} catch(JsonBindingException e) {
-			System.out.println(featureName + " config could not be deserialized:\n" + e.getCause().getMessage());
+			System.err.println(featureName + " config could not be deserialized:\n" + e.getCause().getMessage());
 			return;
-		}
-		//TODO: adds constraint that doesn't exist i.e. "setup".
-		//add dependencies as constraints, if it's not the parent
-		for(String cstr : fileConfig.depends){
+		}		
+		
+		//add dependencies as constraints to the global map, if it's not the parent
+		for(final String cstr : fileConfig.depends){
 			if(!existingFeature.getParent().getName().equals(cstr)) {
-				
-				String impliedFeatureName = cleanNamingExceptions(cstr,namingExceptions);
-				if (fm.getFeature(impliedFeatureName) == null) {
+				final String impliedFeatureName = cleanNamingExceptions(cstr,namingExceptions);
+				final Feature impliedFeature = fm.getFeature(impliedFeatureName);
+				if (impliedFeature == null) {
 					System.err.println("feature " + impliedFeatureName + " not found");
 					continue;
 				}
-				fm.addConstraint(new Constraint(fm,
-						new Implies(
-						new Literal(featureName),
-						//get clean name of the concrete feature
-						new Literal(impliedFeatureName)
-						)
-				));
+				//Add constraints to map-collection
+				if (uniqueConstraints.containsKey(existingFeature)){
+					uniqueConstraints.get(existingFeature).add(impliedFeature);
+				}else{
+					uniqueConstraints.put(existingFeature, new HashSet<Feature>(){
+						private static final long serialVersionUID = 1L;
+					{
+						add(impliedFeature);
+					}});
+				}				
 			}
-		}
+		}		
 		
 		String descText = "";
 		
@@ -214,6 +240,7 @@ public class FeatureModelInterpreter {
 			if (fileConfig.author.getClass().equals(String.class)) {
 				descText += fileConfig.author;
 			} else {
+				@SuppressWarnings("unchecked")
 				Collection<String> authors = (Collection<String>) fileConfig.author;
 				for(String auth : authors){
 					descText += "\n\t" + auth;
@@ -304,6 +331,8 @@ public class FeatureModelInterpreter {
 	
 	public static String createFeatureModel(String path, ArrayList<String> namingExceptions){
 		String result = "";
+		featuresAdded = 0;
+		uniqueConstraints = new HashMap<Feature, Set<Feature>>();
 		try{
 			result = "Project Path:\r\n ";
 			File ProjectFolder;
@@ -336,6 +365,7 @@ public class FeatureModelInterpreter {
 			for(File file : configFiles){
 				addConfigFileToFM(fm, file,namingExceptions );
 			}
+			addConstraints(fm);
 			Date date = new Date() ;
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
 			File xml = new File(ProjectFolder.getAbsolutePath() + "\\generatedModel_"+ dateFormat.format(date)+".xml");
