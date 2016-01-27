@@ -9,7 +9,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -53,10 +52,10 @@ public class ImportWizardPageTwo extends WizardPage {
     });
     GridData gd = new GridData(GridData.FILL_HORIZONTAL);
     namingExceptions.setLayoutData(gd);
-    Label labelCheck = new Label(container, SWT.NONE);
-    labelCheck.setText("Merge with existing Feature model");
-    Button check = new Button(container, SWT.CHECK);
-    check.setSelection(false);
+    //Label labelCheck = new Label(container, SWT.NONE);
+    //labelCheck.setText("Merge with existing Feature model");
+    //Button check = new Button(container, SWT.CHECK);
+    //check.setSelection(false);
     // required to avoid an error in the system
     setControl(container);
     setPageComplete(true);

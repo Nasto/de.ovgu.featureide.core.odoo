@@ -13,6 +13,15 @@
             categoryId="de.ovgu.featureide.code.odoo.commands.OdooCategory"
             id="de.ovgu.featureide.code.odoo.commands.OdooCommand">
       </command>
+      <category
+            name="ConfigurationWizard Category"
+            id="de.ovgu.featureide.code.odoo.commands.CWCategory">
+      </category>
+      <command
+            name="ConfigurationWizard Command"
+            categoryId="de.ovgu.featureide.code.odoo.commands.CWCategory"
+            id="de.ovgu.featureide.code.odoo.commands.CWCommand">
+      </command>
    </extension>
    
    <extension
@@ -21,12 +30,22 @@
             class="de.ovgu.featureide.code.odoo.handler.OdooHandler"
             commandId="de.ovgu.featureide.code.odoo.commands.OdooCommand">
       </handler>
+      <handler
+            class="de.ovgu.featureide.code.odoo.handler.CWHandler"
+            commandId="de.ovgu.featureide.code.odoo.commands.CWCommand">
+      </handler>
    </extension>
    
     <extension
          point="org.eclipse.ui.bindings">
       <key
             commandId="de.ovgu.featureide.code.odoo.commands.OdooCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+      <key
+            commandId="de.ovgu.featureide.code.odoo.commands.CWCommand"
             contextId="org.eclipse.ui.contexts.window"
             sequence="M1+6"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
@@ -44,6 +63,12 @@
                   icon="icons/odooIcon.gif"
                   tooltip="Generate FeatureModel for Odoo"
                   id="de.ovgu.featureide.code.odoo.toolbars.sampleCommand">
+            </command>
+            <command
+                  commandId="de.ovgu.featureide.code.odoo.commands.CWCommand"
+                  icon="icons/odooIcon.gif"
+                  tooltip="ConfigurationWizard"
+                  id="de.ovgu.featureide.code.odoo.toolbars.CWsampleCommand">
             </command>
          </toolbar>
       </menuContribution>
