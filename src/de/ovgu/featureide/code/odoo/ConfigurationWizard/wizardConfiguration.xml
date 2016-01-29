@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationSurvey>
+	<projectName>GPL</projectName>
+	<sections>
+		<section id="0">
+			<name>Graph</name>
+			<description>Configuration of the graph properties</description>
+		</section>
+	</sections>
+	<surveyPages>
+		<page sectionId="0">
+			<question>Is the Graph directed or undirected?</question>
+			<answers type="and">
+				<answer>
+					<name>Directed</name>
+					<description>The edges have a direction associated with them</description>
+					<dependencies>
+						<feature>DoubleEdge</feature>
+						<feature>Node</feature>
+					</dependencies>
+				</answer>
+				<answer>
+					<name>Undirected</name>
+					<description>The edges have no orientation</description>
+				</answer>
+			</answers>
+		</page>
+	</surveyPages>
+</configurationSurvey>

@@ -28,10 +28,8 @@ public class FolderParsing {
 	    }
 	    if(project != null){
 	    	return new File(project.getLocation().toString());
-	    }else
-
-	    	System.out.println("ups");
-	    	return null;
+	    }
+	    return null;
 	}
 	
 	/**

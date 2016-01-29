@@ -18,6 +18,7 @@ public class CustomWizard extends WizardDialog {
 	public void createButtonsForButtonBar(Composite parent){
 		super.createButtonsForButtonBar(parent);
 	    Button backButton = getButton(IDialogConstants.BACK_ID);
-	    backButton.setVisible(false);
+	    if(backButton != null)
+	    	backButton.setVisible(false);
 	}
 }

@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import de.ovgu.featureide.code.odoo.Models.ConfigurationSection;
 import de.ovgu.featureide.code.odoo.Models.ConfigurationWizardPageModel;
 import de.ovgu.featureide.code.odoo.Models.SimpleFeature;
 
@@ -18,11 +19,11 @@ public class GenericConfigurationWizard extends WizardPage {
 	  private Composite container;
 	  private ConfigurationWizardPageModel pageModel;
 
-	  public GenericConfigurationWizard(ConfigurationWizardPageModel ConfigurationWizardPage) {
+	  public GenericConfigurationWizard(ConfigurationSection section,ConfigurationWizardPageModel ConfigurationWizardPage) {
 		super("");
 		pageModel = ConfigurationWizardPage;	    
-	    setTitle(ConfigurationWizardPage.pageName);
-	    setDescription(pageModel.shortDescription);
+	    setTitle(section.getName());
+	    setDescription(section.getDescripton());
 	  }
 
 	  @Override
