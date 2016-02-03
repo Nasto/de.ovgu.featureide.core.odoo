@@ -93,7 +93,7 @@ public class surveyConfigurationParser {
 		               }
 	               }
 	               // Gets the answers
-	               NodeList answerNodes = surveyPageListElement.getElementsByTagName(answer);
+	               NodeList answerNodes = pageElement.getElementsByTagName(answer);
 	               for(int j = 0; j<answerNodes.getLength(); j++){
 	   				Node mNode = answerNodes.item(j);	   				
 	   				if (mNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -106,9 +106,9 @@ public class surveyConfigurationParser {
 		               if(dependencyListElement != null){
 		   	               NodeList dependencyNodes = dependencyListElement.getElementsByTagName(pageAnswerDependencieElement);
 			               for(int k = 0; k<dependencyNodes.getLength(); k++){
-			            	   Node oNode = answerNodes.item(j);	   				
+			            	   Node oNode = dependencyNodes.item(k);	   				
 				   				if (oNode.getNodeType() == Node.ELEMENT_NODE) {
-				   	               Element dependencyElement = (Element) nNode;
+				   	               Element dependencyElement = (Element) oNode;
 				   	               feature.addDependency(dependencyElement.getTextContent());
 				   				}		            	   
 			               }

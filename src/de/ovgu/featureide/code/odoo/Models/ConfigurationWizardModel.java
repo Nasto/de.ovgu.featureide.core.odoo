@@ -18,7 +18,7 @@ public class ConfigurationWizardModel{
 		pages = new ArrayList<ConfigurationWizardPageModel>();
 		sections = new ArrayList<ConfigurationSection>();
 		resultingFeatureNames = new ArrayList<String>();
-	}
+	}	
 	
 	public void setProjectName(String name){
 		projectName = name;
@@ -31,5 +31,4 @@ public class ConfigurationWizardModel{
 	public void addSection(ConfigurationSection section){
 		sections.add(section);
 	}
-	
 }

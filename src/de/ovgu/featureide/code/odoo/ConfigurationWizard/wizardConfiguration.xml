@@ -6,11 +6,15 @@
 			<name>Graph</name>
 			<description>Configuration of the graph properties</description>
 		</section>
+		<section id="1">
+			<name>Setup</name>
+			<description>Setup of the Graph</description>
+		</section>
 	</sections>
 	<surveyPages>
 		<page sectionId="0">
 			<question>Is the Graph directed or undirected?</question>
-			<answers type="and">
+			<answers type="alternative">
 				<answer>
 					<name>Directed</name>
 					<description>The edges have a direction associated with them</description>
@@ -22,6 +26,22 @@
 				<answer>
 					<name>Undirected</name>
 					<description>The edges have no orientation</description>
+				</answer>
+			</answers>
+		</page>
+		<page sectionId="1">
+			<question>Page2..</question>
+			<answers type="and">
+				<answer>
+					<name>A</name>
+					<description>Description A</description>
+					<dependencies>
+						<feature>C</feature>
+					</dependencies>
+				</answer>
+				<answer>
+					<name>B</name>
+					<description></description>
 				</answer>
 			</answers>
 		</page>

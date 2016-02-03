@@ -19,9 +19,9 @@ public class GenericConfigurationWizard extends WizardPage {
 	  private Composite container;
 	  private ConfigurationWizardPageModel pageModel;
 
-	  public GenericConfigurationWizard(ConfigurationSection section,ConfigurationWizardPageModel ConfigurationWizardPage) {
+	  public GenericConfigurationWizard(ConfigurationSection section,ConfigurationWizardPageModel configurationWizardPage) {
 		super("");
-		pageModel = ConfigurationWizardPage;	    
+		pageModel = configurationWizardPage;	    
 	    setTitle(section.getName());
 	    setDescription(section.getDescripton());
 	  }
