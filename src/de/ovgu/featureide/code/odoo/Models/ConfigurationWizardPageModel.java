@@ -10,29 +10,37 @@ public class ConfigurationWizardPageModel {
 	 */
 	public enum logicalOperator{and, alternative}
 	
-	public ConfigurationWizardPageModel(int sectionId, String question, ArrayList<SimpleFeature> features, logicalOperator featureOperator){
+	public ConfigurationWizardPageModel(int id, int sectionId, String question, ArrayList<ConfigurationWizardAnswer> features, logicalOperator featureOperator){
 		this.sectionId = sectionId;
 		this.question = question;
-		this.features = features;
+		this.answers = features;
 		this.featureOperator = featureOperator;
+		this.id = id;
+		visited = false;
 	}
 	
 	public ConfigurationWizardPageModel(){
+		this.id = 0;
 		this.sectionId = 0;
 		this.question = "";
-		this.features = new ArrayList<SimpleFeature>();
+		this.answers = new ArrayList<ConfigurationWizardAnswer>();
 		this.featureOperator = logicalOperator.and;
+		visited = false;
 	}
 	
-	public ArrayList<SimpleFeature> features;
+	public ArrayList<ConfigurationWizardAnswer> answers;
 	
-	public void addFeature(SimpleFeature feature){
-		features.add(feature);
+	public void addFeature(ConfigurationWizardAnswer answer){
+		answers.add(answer);
 	}
 	
 	public String question;
 	
 	public logicalOperator featureOperator;	
 	
+	public boolean visited;
+	
 	public int sectionId;
+	
+	public int id;
 }

@@ -15,27 +15,29 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.ovgu.featureide.code.odoo.Models.ConfigurationSection;
+import de.ovgu.featureide.code.odoo.Models.ConfigurationWizardDependency;
 import de.ovgu.featureide.code.odoo.Models.ConfigurationWizardModel;
 import de.ovgu.featureide.code.odoo.Models.ConfigurationWizardPageModel;
 import de.ovgu.featureide.code.odoo.Models.ConfigurationWizardPageModel.logicalOperator;
-import de.ovgu.featureide.code.odoo.Models.SimpleFeature;
+import de.ovgu.featureide.code.odoo.Models.ConfigurationWizardAnswer;
 
 public class surveyConfigurationParser {
 
 	private static String projectName = "projectName";
-	private static String sectionList = "sections";
 	private static String section = "section";
 	private static String sectionName = "name";
 	private static String sectionDescription = "description";
 	private static String sectionIdAttribute = "id";
-	private static String surveyPageList = "surveyPages";
 	private static String page = "page";
+	private static String pageId = "id";
 	private static String pageSectionIdAttribute = "sectionId";
 	private static String question = "question";
 	private static String answerList = "answers";
 	private static String answer = "answer";
 	private static String answerTypeAttribute = "type";
-	private static String pageAnswerName = "name";
+	private static String pageAnswerName = "label";
+	private static String dependencieElementSelection = "selection";
+	private static String pageAnswerNextPageId = "nextPageId";
 	private static String pageAnswerDescription = "description";
 	private static String pageAnswerDependencieList = "dependencies";
 	private static String pageAnswerDependencieElement = "feature";
@@ -51,8 +53,7 @@ public class surveyConfigurationParser {
 			result.setProjectName(doc.getElementsByTagName(projectName).item(0).getTextContent());
 			
 			// Gets the sections
-			Element sectionListElement = (Element) doc.getElementsByTagName(sectionList).item(0);
-			NodeList sectionNodes = sectionListElement.getElementsByTagName(section);
+			NodeList sectionNodes = doc.getElementsByTagName(section);
 			for(int i = 0; i<sectionNodes.getLength(); i++){
 				Node nNode = sectionNodes.item(i);
 				ConfigurationSection section = new ConfigurationSection();
@@ -66,8 +67,7 @@ public class surveyConfigurationParser {
 			}		
 			
 			// Gets the pages
-			Element surveyPageListElement = (Element) doc.getElementsByTagName(surveyPageList).item(0);
-			NodeList pageNodes = surveyPageListElement.getElementsByTagName(page);
+			NodeList pageNodes = doc.getElementsByTagName(page);
 			for(int i = 0; i<pageNodes.getLength(); i++){
 				Node nNode = pageNodes.item(i);
 				ConfigurationWizardPageModel page = new ConfigurationWizardPageModel();
@@ -75,6 +75,7 @@ public class surveyConfigurationParser {
 	               Element pageElement = (Element) nNode;
 	               page.sectionId = Integer.parseInt(pageElement.getAttribute(pageSectionIdAttribute));
 	               page.question = pageElement.getElementsByTagName(question).item(0).getTextContent();
+	               page.id = Integer.parseInt(pageElement.getAttribute(pageId));
 	               
 	               // Gets the answerList               
 	               Element answerListElement = (Element) pageElement.getElementsByTagName(answerList).item(0);
@@ -97,23 +98,29 @@ public class surveyConfigurationParser {
 	               for(int j = 0; j<answerNodes.getLength(); j++){
 	   				Node mNode = answerNodes.item(j);	   				
 	   				if (mNode.getNodeType() == Node.ELEMENT_NODE) {
-	   	               Element asnwerElement = (Element) mNode;
-	   	               SimpleFeature feature = new SimpleFeature(asnwerElement.getElementsByTagName(pageAnswerName).item(0).getTextContent(),
-	   	            		   asnwerElement.getElementsByTagName(pageAnswerDescription).item(0).getTextContent());
-	   	               
+	   	               Element answerElement = (Element) mNode;
+	   	            ConfigurationWizardAnswer answer = new ConfigurationWizardAnswer(answerElement.getElementsByTagName(pageAnswerName).item(0).getTextContent(),
+	   	            		answerElement.getElementsByTagName(pageAnswerDescription).item(0).getTextContent());
+	   	            if(answerElement.hasAttribute(pageAnswerNextPageId)){
+	   	            	answer.setNextPageId(Integer.parseInt(answerElement.getAttribute(pageAnswerNextPageId)));
+	   	            }	   	            
 	   	               // Gets the dependencies
-		               Element dependencyListElement = (Element) asnwerElement.getElementsByTagName(pageAnswerDependencieList).item(0);
+		               Element dependencyListElement = (Element) answerElement.getElementsByTagName(pageAnswerDependencieList).item(0);
 		               if(dependencyListElement != null){
 		   	               NodeList dependencyNodes = dependencyListElement.getElementsByTagName(pageAnswerDependencieElement);
 			               for(int k = 0; k<dependencyNodes.getLength(); k++){
 			            	   Node oNode = dependencyNodes.item(k);	   				
 				   				if (oNode.getNodeType() == Node.ELEMENT_NODE) {
 				   	               Element dependencyElement = (Element) oNode;
-				   	               feature.addDependency(dependencyElement.getTextContent());
-				   				}		            	   
+				   	               if(dependencyElement.hasAttribute(dependencieElementSelection)){
+				   	            	 answer.addDependency(new ConfigurationWizardDependency(dependencyElement.getTextContent(),Boolean.parseBoolean(dependencyElement.getAttribute(dependencieElementSelection))));
+				   				   }else{
+				   					answer.addDependency(new ConfigurationWizardDependency(dependencyElement.getTextContent()));
+					   				}
+				   	            }		            	   
 			               }
 		               }
-		               page.addFeature(feature);		           
+		               page.addFeature(answer);		           
 	   				}
 	               }	               
 	               result.addPage(page);

@@ -31,4 +31,13 @@ public class ConfigurationWizardModel{
 	public void addSection(ConfigurationSection section){
 		sections.add(section);
 	}
+	
+	public ConfigurationWizardPageModel getPage(int id){
+		for(ConfigurationWizardPageModel page: pages){
+			if(page.id == id){
+				return page;
+			}
+		}
+		return null;
+	}
 }

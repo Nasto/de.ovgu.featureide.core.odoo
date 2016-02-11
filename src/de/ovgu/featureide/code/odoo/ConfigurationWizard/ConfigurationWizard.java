@@ -3,10 +3,15 @@ package de.ovgu.featureide.code.odoo.ConfigurationWizard;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 
+import de.ovgu.featureide.code.odoo.Models.AnswerChangedListener;
 import de.ovgu.featureide.code.odoo.Models.ConfigurationSection;
+import de.ovgu.featureide.code.odoo.Models.ConfigurationWizardAnswer;
 import de.ovgu.featureide.code.odoo.Models.ConfigurationWizardModel;
 import de.ovgu.featureide.code.odoo.Models.ConfigurationWizardPageModel;
 import de.ovgu.featureide.code.odoo.util.FolderParsing;
@@ -15,17 +20,22 @@ import de.ovgu.featureide.code.odoo.util.surveyConfigurationParser;
 
 public class ConfigurationWizard extends Wizard {
 
-  protected ArrayList<GenericConfigurationWizard> wizardPages;
-  private int pageIndex;
+  private GenericConfigurationWizard currentWizardPageModel;
   private String title;
   private ConfigurationWizardModel configurationModel;
+  private boolean isCheck;
+  private Button nextButton;
   
   public ConfigurationWizard() {
     super();
+    isCheck = true;
     setNeedsProgressMonitor(true);
     configurationModel = surveyConfigurationParser.parseConfiguration(new File(FolderParsing.getCurrentProjectFolder()+"\\wizardConfiguration.xml"));
 	setTitle(configurationModel.projectName);
-	wizardPages = new ArrayList<GenericConfigurationWizard>();
+  }
+  
+  public void passNextButton(Button nextButton){
+	  this.nextButton = nextButton;
   }
   
   private void setTitle(String title){
@@ -40,8 +50,8 @@ public class ConfigurationWizard extends Wizard {
   @Override
   public void addPages() {
 	//Adds the first page
-    pageIndex = 0;
-	addPage(getWizardPageFromModel(pageIndex,configurationModel));	
+	  
+	  getNextPage(null);
   }
     
   @Override
@@ -49,24 +59,73 @@ public class ConfigurationWizard extends Wizard {
       return configurationModel.pages.size() > 1;
   }
   
-  private GenericConfigurationWizard getWizardPageFromModel(int index, ConfigurationWizardModel configurationWizardModel ){
-	  if (index >= configurationWizardModel.pages.size()) {
-		// last page or page not found
-	    return null;
+  private GenericConfigurationWizard getWizardPageFromModel(GenericConfigurationWizard currentPage, ConfigurationWizardModel configurationWizardModel ){
+	  ConfigurationWizardPageModel page = null;
+	  if(currentPage == null){
+		  //get the first Page
+		  page = configurationWizardModel.pages.get(0);
+	  }else{		  
+		  ArrayList<ConfigurationWizardAnswer> results = currentPage.getResult();
+		  for (ConfigurationWizardAnswer answer : results){
+			  if(answer.isSelected() && answer.hasNextPageId()){
+				  //potential next page
+				  if(configurationWizardModel.getPage(answer.getNextPageId()) != null && !configurationWizardModel.getPage(answer.getNextPageId()).visited){
+					  // PageId is valid and page was not already visited		
+					  page = configurationWizardModel.getPage(answer.getNextPageId());
+					  break;
+				  }
+			  }
+		  }
+		  if(page == null){
+			  if(isCheck){
+				  //Check if there could be a next Page
+				  for (ConfigurationWizardAnswer answer : results){
+					  if(answer.hasNextPageId()){
+						  //potential next page
+						  if(configurationWizardModel.getPage(answer.getNextPageId()) != null && !configurationWizardModel.getPage(answer.getNextPageId()).visited){
+							  // PageId is valid and page was not already visited		
+							  page = configurationWizardModel.getPage(answer.getNextPageId());
+							  break;
+						  }				  
+					  }
+				  }
+			  }else{
+				  checkNextButton(currentPage.getResult());
+			  }
+			  if(page==null){
+				  return null;
+			  }			  
+		  }
 	  }
-      ConfigurationWizardPageModel page = configurationWizardModel.pages.get(index);
-      // TODO: check if page has choices left to make, otherwise skip it
 	  ConfigurationSection section = getSectionForPage(configurationWizardModel,page );
 	  return new GenericConfigurationWizard(section, page);
+  }
+  
+  private void checkNextButton(ArrayList<ConfigurationWizardAnswer> answers){
+	  nextButton.setEnabled(false);
+		for (ConfigurationWizardAnswer answer : answers){
+			  if(answer.isSelected() && answer.hasNextPageId()){
+				  nextButton.setEnabled(true);
+				  break;
+			  }					  
+		  }
   }
   
   @Override
 	public IWizardPage getNextPage(IWizardPage page) {
 	  // TODO: disable answers based on featureModel
-	  GenericConfigurationWizard newPage = getWizardPageFromModel(pageIndex++,configurationModel );
-	  if(newPage != null){
+	  isCheck = !isCheck;
+	  GenericConfigurationWizard newPage = getWizardPageFromModel(currentWizardPageModel,configurationModel );
+	  if(newPage != null && !isCheck){
+		  newPage.addEventListener(new AnswerChangedListener() {			
+			@Override
+			public void answersChangedEvent(ArrayList<ConfigurationWizardAnswer> answers) {
+				checkNextButton(answers);
+			}
+		});
+		  currentWizardPageModel = newPage;
 		  addPage(newPage);
-	  }	  
+	  }
       return newPage;
   }
   

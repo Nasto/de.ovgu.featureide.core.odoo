@@ -8,11 +8,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 public class CustomWizard extends WizardDialog {
-
-	public CustomWizard(Shell parentShell, IWizard newWizard) {
+	private ConfigurationWizard wizzard;
+	
+	public CustomWizard(Shell parentShell, IWizard newWizard) {		
 		super(parentShell, newWizard);
+		wizzard = (ConfigurationWizard)newWizard;
 		setHelpAvailable(false);
 	}
+	
+	
 
 	@Override
 	public void createButtonsForButtonBar(Composite parent){
@@ -20,5 +24,11 @@ public class CustomWizard extends WizardDialog {
 	    Button backButton = getButton(IDialogConstants.BACK_ID);
 	    if(backButton != null)
 	    	backButton.setVisible(false);
+
+	    Button nextButton = getButton(IDialogConstants.NEXT_ID);
+	    if(nextButton != null){
+	    	wizzard.passNextButton(nextButton);	    	
+	    }
+	    
 	}
 }
