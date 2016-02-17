@@ -368,7 +368,7 @@ public class FeatureModelInterpreter {
 			addConstraints(fm);
 			Date date = new Date() ;
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
-			File xml = new File(ProjectFolder.getAbsolutePath() + "\\generatedModel_"+ dateFormat.format(date)+".xml");
+			File xml = new File(ProjectFolder.getAbsolutePath() + "\\"+ dateFormat.format(date)+"_model.xml");
 			new XmlFeatureModelWriter(fm).writeToFile(xml);
 			
 			result += "\r\nFeature Model was created successfully";

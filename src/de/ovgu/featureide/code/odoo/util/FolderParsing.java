@@ -1,13 +1,23 @@
 package de.ovgu.featureide.code.odoo.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+
+import de.ovgu.featureide.fm.core.FeatureModel;
+import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
+import de.ovgu.featureide.fm.core.io.xml.XmlFeatureModelReader;
 
 public class FolderParsing {
 
@@ -30,6 +40,50 @@ public class FolderParsing {
 	    	return new File(project.getLocation().toString());
 	    }
 	    return null;
+	}
+	
+	public static FeatureModel getFirstFeatureModel(){
+		File[] files = getFilesWithEnding("model.xml");
+		if(files.length == 0) return null;
+		FeatureModel fm = new FeatureModel();
+		fm.xxxSetSourceFile(files[0]);
+		XmlFeatureModelReader d = new XmlFeatureModelReader(fm);
+		try {
+			d.readFromFile(files[0]);
+		} catch (FileNotFoundException | UnsupportedModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return fm;
+	}
+	
+	public static void writeToFile(String content){
+		try {
+			Date date = new Date() ;
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
+			File file = new File(FolderParsing.getCurrentProjectFolder().getAbsolutePath() + "\\"+ dateFormat.format(date)+".config");			
+			FileWriter fileWriter = new FileWriter(file);
+			fileWriter.write(content);
+			fileWriter.flush();
+			fileWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static File[] getFilesWithEnding(final String ending){
+		File dir = getCurrentProjectFolder();
+		File [] files = dir.listFiles(new FilenameFilter() {
+		    @Override
+		    public boolean accept(File dir, String name) {
+		        return name.endsWith(ending);
+		    }
+		});
+
+		for (File xmlfile : files) {
+		    System.out.println(xmlfile);
+		}
+		return files;
 	}
 	
 	/**

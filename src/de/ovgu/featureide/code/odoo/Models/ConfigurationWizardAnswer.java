@@ -25,6 +25,10 @@ public class ConfigurationWizardAnswer {
 		dependencies.add(dependency);
 	}
 	
+	public ArrayList<ConfigurationWizardDependency> getDependencies(){
+		return dependencies;
+	}
+	
 	public void setNextPageId(int id){
 		nextPageId = id;
 		hasNextPageId = true;

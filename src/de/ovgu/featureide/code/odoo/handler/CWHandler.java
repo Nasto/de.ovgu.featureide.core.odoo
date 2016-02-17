@@ -8,6 +8,8 @@ import org.eclipse.swt.widgets.Display;
 
 import de.ovgu.featureide.code.odoo.ConfigurationWizard.ConfigurationWizard;
 import de.ovgu.featureide.code.odoo.ConfigurationWizard.CustomWizard;
+import de.ovgu.featureide.code.odoo.util.FolderParsing;
+import de.ovgu.featureide.fm.core.FeatureModel;
 
 
 
@@ -27,7 +29,9 @@ public class CWHandler implements IHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		CustomWizard cw  = new CustomWizard(Display.getDefault().getActiveShell(),new ConfigurationWizard());
+		
+		FeatureModel fm = FolderParsing.getFirstFeatureModel();
+		CustomWizard cw  = new CustomWizard(Display.getDefault().getActiveShell(),new ConfigurationWizard(fm));
 		cw.open();
 		return null;
 	}
