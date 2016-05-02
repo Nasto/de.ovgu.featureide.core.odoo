@@ -1,76 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationSurvey>
-	<projectName>GPL</projectName>
+	<projectName>Odoo</projectName>
 	<section id="0">
-		<name>Graph</name>
-		<description>Configuration of the graph properties</description>
+		<name>General Questions</name>
+		<description>General questions that help build the perfect questionnaire for you.</description>
 	</section>
 	<section id="1">
-		<name>Setup</name>
-		<description>Setup of the Graph</description>
+		<name>Websites</name>
+		<description>Build great user experience</description>
+	</section>
+	<section id="2">
+		<name>eCommerce</name>
+		<description>Awesome product pages. Mobile friendly. Easy.</description>
 	</section>
 	<page id="0" sectionId="0">
-		<question>Is the Graph directed or undirected?</question>
+		<question>Do you already use Odoo components in your company?</question>
 		<answers type="alternative">
-			<answer nextPageId="1">
-				<label>Directed</label>
-				<description>The edges have a direction associated with them</description>
-				<dependencies>
-					<feature selection="false">DoubleEdge</feature>
-					<feature>Node</feature>
-				</dependencies>
+			<answer>
+				<label>Yes</label>
+				<description>I use Odoo components and want to add new ones.</description>
 			</answer>
 			<answer nextPageId="2">
-				<label>Undirected</label>
-				<description>The edges have no orientation</description>
+				<label>No</label>
+				<description>I do not use any Odoo components but want to.</description>
 			</answer>
 		</answers>
 	</page>
-	<page id="1" sectionId="1">
-		<question>Page2..</question>
+	<page id="2" sectionId="0">
+		<question>What topics are you interested in? You can choose as many as you want.</question>
 		<answers type="and">
-			<answer>
-				<label>A</label>
-				<description>Description A</description>
-				<dependencies>
-					<feature>C</feature>
-				</dependencies>
-			</answer>
-			<answer>
-				<label>B</label>
-				<description></description>
-			</answer>
-		</answers>
-	</page>
-	<page id="2" sectionId="1">
-		<question>Page2b..</question>
-		<answers type="and">
-			<answer>
-				<label>A2</label>
-				<description>Description A2</description>
-				<dependencies>
-					<feature>C</feature>
-				</dependencies>
-			</answer>
 			<answer nextPageId="3">
-				<label>B2</label>
-				<description></description>
+				<label>Websites</label>
+				<description>Build great user experience</description>
+				<dependencies>
+					<feature>website</feature>
+				</dependencies>
+			</answer>
+			<answer>
+				<label>Sales</label>
+				<description>Boost your success rate</description>
+				<dependencies>
+					<feature>sales</feature>
+				</dependencies>
+			</answer>
+			<answer>
+				<label>Operations</label>
+				<description>Its all about efficiency</description>
+				<dependencies>
+					<feature>operations</feature>
+				</dependencies>
+			</answer>
+			<answer>
+				<label>Productivity Tools</label>
+				<description>Great Tools = Happy People</description>
+				<dependencies>
+					<feature>productivity</feature>
+				</dependencies>
 			</answer>
 		</answers>
 	</page>
 	<page id="3" sectionId="1">
-		<question>Page3..</question>
+		<question>Please choose the topics you want to use.</question>
 		<answers type="and">
 			<answer>
-				<label>Label</label>
-				<description>Description A2</description>
+				<label>Website Builder</label>
+				<description>Your enterprise website builder</description>
+			</answer>
+			<answer nextPageId="8">
+				<label>eCommerce</label>
+				<description>Modern Open Source Online Store</description>
 				<dependencies>
-					<feature>Button</feature>
+					<feature>sale</feature>
+					<feature>stock</feature>					
+					<feature>protal</feature>
 				</dependencies>
 			</answer>
 			<answer>
-				<label>Button</label>
+				<label>Blogs</label>
+				<description>Beautiful open source blogging platform</description>
+			</answer>
+			<answer>
+				<label>Forums</label>
+				<description>Open source Stackoverflow and Quora alternative.</description>
+			</answer>
+			<answer>
+				<label>Slides</label>
+				<description>The power of YouTube and Slideshare combined on your website</description>
+			</answer>
+			<answer>
+				<label>SEA</label>
+				<description>Benchmark AdWords Campaigns And Launch Optimization Algorithms</description>
+			</answer>
+		</answers>
+	</page>
+	<page id="8" sectionId="2">
+		<question>What modules would you like on your eCommerce website?</question>
+		<answers type="and">
+			<answer>
+				<label>CRM</label>
 				<description></description>
+				<dependencies>
+					<feature>sale_crm</feature>
+				</dependencies>
+			</answer>
+			<answer>
+				<label>Sales</label>
+				<description></description>
+				<dependencies>
+					<feature>sale_stock</feature>
+				</dependencies>
+			</answer>
+			<answer>
+				<label>Accounting</label>
+				<description></description>
+				<dependencies>
+					<feature>account</feature>
+				</dependencies>
+			</answer>
+			<answer>
+				<label>Projects</label>
+				<description></description>
+				<dependencies>
+					<feature>project</feature>
+				</dependencies>
+			</answer>
+			<answer>
+				<label>Invoicing</label>
+				<description></description>
+				<dependencies>
+					<feature>invoice</feature>
+				</dependencies>
+			</answer>
+			<answer>
+				<label>Email marketing</label>
+				<description></description>
+				<dependencies>
+					<feature>email_marketing</feature>
+				</dependencies>
 			</answer>
 		</answers>
 	</page>
