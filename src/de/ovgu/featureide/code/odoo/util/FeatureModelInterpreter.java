@@ -406,6 +406,7 @@ public class FeatureModelInterpreter {
             e.printStackTrace();    
         }    
 
+		//Test
         return new String(buffer);    
     }
 }
